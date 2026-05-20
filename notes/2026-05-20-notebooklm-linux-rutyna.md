@@ -100,7 +100,21 @@ client = NotebookLMClient.from_storage(
 
 ## Status
 
-- [ ] Wygenerować storage_state.json przez VNC
+- [x] Wygenerować storage_state.json przez VNC — 2026-05-20 22:17 (49 cookies, expires 2027-06-24, rotujące SIDTS/SIDCC 2027-05-20). Smoke test z `notebooklm-py.from_storage` + `notebooks.list()` przeszedł: AUTH OK, 3 notebooki na koncie. Plik: `/home/Marcin/shared/storage_state.json`. 2FA Google na nowym IP (Azure VM) NIE wymagał dodatkowej weryfikacji (Google zaakceptował sesję z VM).
 - [ ] Wkleić do sekretu rutyny na claude.ai
 - [ ] PoC: YouTube URL → Audio Overview → Telegram
 - [ ] Obserwacja 3–5 dni → decyzja czy zostać z NotebookLM czy edge-tts
+
+## Lessons learned (z dzisiejszej ekstrakcji)
+
+- **`notebooklm-py` API jest async-first** — `from_storage` zwraca coroutine, `notebooks.list()` też. Wymaga:
+  ```python
+  client = await NotebookLMClient.from_storage(path=...)
+  async with client:
+      notebooks = await client.notebooks.list()
+  ```
+  Bez `async with`: `RuntimeError: Client not initialized. Use 'async with' context.`
+- **Playwright `launch_persistent_context(headless=False)` NIE wystartowało Chromium** w tym setupie (DISPLAY=:1, tigervnc). Nie ma child procesów chromium, ale `page.goto()` przechodzi (cisza). Dlaczego — nieustalone (może race z X serwerem na VNC). Bezpieczniejsze: `subprocess.Popen(chrome, --remote-debugging-port=9222 --user-data-dir=/tmp/nlm-profile)` + `playwright.chromium.connect_over_cdp(...)` po zalogowaniu.
+- **System Chrome od user-a (PID 21881) chodzi cały czas** w VNC; pominięto, użyto Playwright-bundled Chromium z `~/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome`.
+- **`tmux-main.service` jest `inactive`** — sam tmux żyje, ale systemd już go nie pilnuje. Osobny issue (nie blokowało zadania, ale po restarcie VM nie wstanie automatycznie).
+- **VNC słucha tylko na `localhost:5901`** — bez tunelu SSH (`ssh -L 5901:localhost:5901`) klient nie zobaczy okna.
