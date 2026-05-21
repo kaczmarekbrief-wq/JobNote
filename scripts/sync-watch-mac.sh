@@ -7,7 +7,7 @@ LOG="$HOME/shared/scripts/sync-mac.log"
 
 echo "[$(date)] sync-watch-mac uruchomiony" >> "$LOG"
 
-fswatch -o --exclude='\.git' --exclude='sync-mac\.log' "$SHARED" | while read -r count; do
+/opt/homebrew/bin/fswatch -o --exclude='\.git' --exclude='sync-mac\.log' "$SHARED" | while read -r count; do
     cd "$SHARED" || continue
     git add -A
     if ! git diff --cached --quiet; then
