@@ -8,7 +8,7 @@ promoted: false
 ## Dane VM
 
 - **IP publiczne:** `20.54.82.106`
-- **User:** `Marcin` / hasło: `Marcin2026!`
+- **User:** `Marcin` / hasło: `<HASLO_VM>`
 - **Klucz SSH (Mac):** `~/.ssh/claude-vm_key.pem`
 - **SSH:** `ssh -i ~/.ssh/claude-vm_key.pem Marcin@20.54.82.106`
 
@@ -78,7 +78,7 @@ ssh -i ~/.ssh/claude-vm_key.pem -L 5901:localhost:5901 -N Marcin@20.54.82.106
 # Krok 2: połącz VNC klientem
 # macOS Screen Sharing (Spotlight → "Screen Sharing"):
 #   vnc://localhost:5901
-# Hasło VNC: Marcin2026!
+# Hasło VNC: <HASLO_VM>
 ```
 
 **Uwaga:** przy zmianie sieci (dom → praca) tunel się zamyka — trzeba go otworzyć ponownie.
@@ -94,7 +94,7 @@ Wymaga tunelu SSH:
 ssh -i ~/.ssh/claude-vm_key.pem -L 3389:localhost:3389 -N Marcin@20.54.82.106
 
 # Krok 2: Microsoft Remote Desktop → localhost:3389
-# User: Marcin / hasło: Marcin2026!
+# User: Marcin / hasło: <HASLO_VM>
 ```
 
 xrdp jest skonfigurowany żeby podłączyć się do istniejącej sesji VNC (port 5901).
