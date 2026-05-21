@@ -135,7 +135,7 @@ ssh -i ~/.ssh/claude-vm_key.pem Marcin@20.54.82.106 "echo 'Marcin:<TWOJE_HASLO>'
 
 Reset hasła VNC:
 ```bash
-ssh -i ~/.ssh/claude-vm_key.pem Marcin@20.54.82.106 "echo 'Marcin2026!' | vncpasswd -f > ~/.vnc/passwd"
+ssh -i ~/.ssh/claude-vm_key.pem Marcin@20.54.82.106 "echo '<TWOJE_HASLO>' | vncpasswd -f > ~/.vnc/passwd"
 ```
 
 ### Notatki nie synchronizują się
