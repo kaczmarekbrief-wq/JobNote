@@ -128,7 +128,7 @@ Port 3389 zablokowany przez Azure — użyj tunelu (patrz wyżej).
 
 Hasło nie ustawione lub wygasło:
 ```bash
-ssh -i ~/.ssh/claude-vm_key.pem Marcin@20.54.82.106 "echo 'Marcin:Marcin2026!' | sudo chpasswd"
+ssh -i ~/.ssh/claude-vm_key.pem Marcin@20.54.82.106 "echo 'Marcin:<TWOJE_HASLO>' | sudo chpasswd"
 ```
 
 ### RDP "VNC password failed"
