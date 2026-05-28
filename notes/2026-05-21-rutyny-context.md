@@ -1,5 +1,6 @@
 ---
 date: "2026-05-21 00:30"
+updated: "2026-05-29"
 promoted: false
 ---
 
@@ -7,6 +8,65 @@ promoted: false
 
 > Notatka dla Claude na Linuxie / Composio sandbox.
 > Zawiera wszystko czego potrzebujesz do uruchomienia rutyn — bez dopytywania.
+
+---
+
+## Stan na 2026-05-29 — VM Daily Brief działa produkcyjnie
+
+### Główna rutyna: VM `/opt/routines/daily-brief-unified/`
+
+**Działa codziennie od 2026-05-21. Ostatni run: 2026-05-28 msg_id=1684.**
+
+| Komponent | Plik | Status |
+|---|---|---|
+| Zbieranie danych | `collectors.py` | ✅ |
+| Formatowanie | `formatters.py` | ✅ |
+| Audio pipeline | `audio_pipeline.py` | ✅ |
+| Punkt wejścia | `run_brief.py` | ✅ |
+
+**Timer:** `systemd --user daily-brief-unified.timer` — codziennie 04:45 CEST (02:45 UTC)  
+**Sprawdź:** `systemctl --user status daily-brief-unified.timer`  
+**Logi:** `/opt/routines/logs/daily-brief-YYYYMMDDTHHMMSS.log` + `.json`
+
+**Dane zbierane co rano:**
+- ✅ Pogoda Dębica (open-meteo)
+- ✅ Imieniny
+- ✅ AI/LLM newsy (HN Algolia)
+- ✅ Robotyka RSS
+- ✅ Zadania (Azure Function `/api/tasks`)
+- ⚠️ arXiv — timeout, graceful degradation
+
+**Audio:**
+- PRIMARY: NotebookLM PL (~271s generacji, ~4MB MP3, dwoje hostów AI)
+- FALLBACK: edge-tts EN Ryan
+
+**Dostawa:**
+- Telegram: bezpośrednie Bot API (token: `TELEGRAM_BOT_TOKEN` w `~/shared/.env`)
+- Bot: ClaudeOPPArchitectBot
+
+**Auth NotebookLM:**
+- `storage_state.json`: `/home/Marcin/shared/storage_state.json` (chmod 600)
+- 49 cookies, expires 2027-06-24
+- venv: `/home/Marcin/.venv` (notebooklm-py 0.4.1)
+
+### Rutyna cloud (claude.ai) — wakeup only
+
+Oddzielna rutyna na claude.ai wysyła tylko wakeup na Telegram i buzi sesję na VM.  
+**NIE** generuje audio — to robi VM lokalnie.
+
+### Brakuje (Phase 2)
+
+- 📅 **Spotkania z kalendarza** — potrzebny GET endpoint na Azure Function `/api/calendar?day=YYYY-MM-DD`
+- 📧 **Email "wymaga uwagi"** — M365 OAuth z VM (Microsoft Graph, msal)
+- 📤 **Email podsumowanie** z `kaczmarekbrief@gmail.com` → do `m.szostak@autoproces.pl`
+  - Potrzebny: Gmail App Password (Settings → Security → App Passwords)
+  - Metoda: SMTP przez `smtplib` z `/home/Marcin/shared/.env`
+
+### Inne rutyny cloud (claude.ai) — działają osobno
+
+Nie ingeruj w: `Wiadomości`, `AI_PROGRESS`, `Sprawdzenie kalendarza` — oddzielne rutyny.
+
+---
 
 ## Telegram
 
