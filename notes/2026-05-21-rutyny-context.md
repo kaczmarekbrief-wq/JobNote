@@ -54,13 +54,51 @@ promoted: false
 Oddzielna rutyna na claude.ai wysyła tylko wakeup na Telegram i buzi sesję na VM.  
 **NIE** generuje audio — to robi VM lokalnie.
 
-### Brakuje (Phase 2)
+### Zmiany 2026-05-29 — pełna integracja M365 + rozszerzone newsy
 
-- 📅 **Spotkania z kalendarza** — potrzebny GET endpoint na Azure Function `/api/calendar?day=YYYY-MM-DD`
-- 📧 **Email "wymaga uwagi"** — M365 OAuth z VM (Microsoft Graph, msal)
-- 📤 **Email podsumowanie** z `kaczmarekbrief@gmail.com` → do `m.szostak@autoproces.pl`
-  - Potrzebny: Gmail App Password (Settings → Security → App Passwords)
-  - Metoda: SMTP przez `smtplib` z `/home/Marcin/shared/.env`
+#### Nowe endpointy Azure Function (deployed)
+
+| Endpoint | Co robi |
+|---|---|
+| `GET /api/calendar-get?day=YYYY-MM-DD` | Spotkania z kalendarza Outlook |
+| `GET /api/emails?hours=24` | Emaile z Inbox (ostatnie N godzin) |
+| `POST /api/calendar` | Tworzy blok (bez zmian) |
+| `GET /api/tasks` | Zadania To-Do (bez zmian) |
+
+Managed Identity `autoproces-brief-tasks` (object ID: `d7be2448-cc11-42ef-bcc0-44089029c691`):
+- ✅ `Calendars.ReadWrite` — było
+- ✅ `Mail.Read` — dodano 2026-05-29 przez Azure Cloud Shell
+
+#### Nowe kolektory w `collectors.py`
+
+- `get_calendar()` → Azure Function GET `/api/calendar-get` — spotkania dnia/jutro
+- `get_emails()` → Azure Function GET `/api/emails?hours=24` — emaile z filtrem spamu
+
+#### Bloki kalendarza w `run_brief.py` — `create_calendar_blocks()`
+
+Krok 1.5 uruchamia się po zebraniu danych:
+- **Blok "Zadania zaległe (N)"** → wolny slot 09:00–11:00 — jeśli overdue ≥ 1
+- **Blok "Przygotowanie do: {spotkanie}"** → 30–60 min przed spotkaniem
+  - Treść bloku: uczestnicy + powiązane emaile (match po email/nazwisku) + powiązane zadania
+
+#### Rozszerzone newsy
+
+| Sekcja | Przed | Po |
+|---|---|---|
+| AI news | 8 itemów, tylko tytuły | 12 itemów, excerpty 600 zn, okno 48h |
+| Robotics | 5 itemów, 1 feed | 10 itemów, 4 feedy |
+| format_pl | ~3200 zn (~3 min) | ~7900 zn (~9 min) |
+
+Działające feedy robotyki:
+- `roboticsandautomationnews.com/feed/` ✅
+- `spectrum.ieee.org/rss/robotics/fulltext` ✅ (IEEE)
+- `manufacturingtomorrow.com/rss/news.php` ✅
+- `plasticstoday.com/rss.xml` ✅
+
+#### Nierozwiązane
+
+- 📤 **Email z kaczmarekbrief@gmail.com** — Composio API zwraca 410 Gone (API v1/v2 wycofane, v3 404). Do rozwiązania osobno — opcje: Gmail OAuth2 one-time setup, lub inny relay.
+- ⏱ **arXiv** — timeout/429, graceful degradation, nie krytyczne.
 
 ### Inne rutyny cloud (claude.ai) — działają osobno
 
