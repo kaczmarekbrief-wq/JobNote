@@ -15,7 +15,7 @@ promoted: false
 
 ### Główna rutyna: VM `/opt/routines/daily-brief-unified/`
 
-**Działa codziennie od 2026-05-21. Ostatni run: 2026-05-28 msg_id=1684.**
+**Działa codziennie od 2026-05-21. Ostatnia duża aktualizacja: 2026-05-29.**
 
 | Komponent | Plik | Status |
 |---|---|---|
@@ -28,17 +28,29 @@ promoted: false
 **Sprawdź:** `systemctl --user status daily-brief-unified.timer`  
 **Logi:** `/opt/routines/logs/daily-brief-YYYYMMDDTHHMMSS.log` + `.json`
 
-**Dane zbierane co rano:**
+**Dane zbierane co rano (aktualna lista):**
 - ✅ Pogoda Dębica (open-meteo)
-- ✅ Imieniny
-- ✅ AI/LLM newsy (HN Algolia)
-- ✅ Robotyka RSS
-- ✅ Zadania (Azure Function `/api/tasks`)
-- ⚠️ arXiv — timeout, graceful degradation
+- ✅ Imieniny (Wikipedia PL)
+- ✅ AI/LLM newsy (HN Algolia, 12 itemów, excerpty, okno 48h)
+- ✅ Robotyka globalna (4 feedy RSS: roboticsandautomationnews, IEEE, manufacturingtomorrow, plasticstoday)
+- ✅ Polskie newsy automatyzacja (Google News RSS, 5 itemów)
+- ✅ Zadania MUST_DO / zaległe (Azure Function `/api/tasks`)
+- ✅ Spotkania z kalendarza (Azure Function `/api/calendar-get`)
+- ✅ Emaile ważne z inboxa (Azure Function `/api/emails?hours=24`)
+- ✅ Kursy walut EUR/PLN i USD/PLN (Frankfurter API)
+- ⚠️ arXiv — timeout/429, graceful degradation, nie krytyczne
+
+**Bloki w kalendarzu (run_brief.py krok 1.5):**
+- Blok "Zadania zaległe (N)" → slot 09:00–11:00
+- Bloki "Przygotowanie do: {spotkanie}" → 30–60 min przed spotkaniem
+- Godziny pracy: 08:00–17:00 (bloki NIE wychodzą po 17:00)
+- Treść bloku: uczestnicy + powiązane emaile + powiązane zadania
+
+**Długość briefu:** ~8400 znaków → ~9 min audio
 
 **Audio:**
-- PRIMARY: NotebookLM PL (~271s generacji, ~4MB MP3, dwoje hostów AI)
-- FALLBACK: edge-tts EN Ryan
+- PRIMARY: NotebookLM PL (~4–8 min generacji, ~4MB MP3, dwoje hostów AI, limit ~3/dzień)
+- FALLBACK: edge-tts EN Ryan (gdy rate-limit lub błąd NLM)
 
 **Dostawa:**
 - Telegram: bezpośrednie Bot API (token: `TELEGRAM_BOT_TOKEN` w `~/shared/.env`)
