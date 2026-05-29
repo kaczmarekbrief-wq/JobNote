@@ -95,10 +95,35 @@ Działające feedy robotyki:
 - `manufacturingtomorrow.com/rss/news.php` ✅
 - `plasticstoday.com/rss.xml` ✅
 
+#### Rozszerzenia briefu — 2026-05-29 (sesja wieczorna)
+
+**Synteza na początku (`formatters.py` → `format_pl`)**
+Brief zaczyna się od 30-sekundowego streszczenia:
+> „W skrócie: Masz dziś 2 spotkania — X i Y. Uwaga: 9 zadań przeterminowanych. W skrzynce 8 ważnych maili, w tym od Z."
+
+**Kursy walut — Frankfurter API (darmowe, bez klucza)**
+- URL: `https://api.frankfurter.app/latest?from=EUR&to=PLN,USD`
+- Wymaga SSL context z `check_hostname=False` (cert issue z VM)
+- Kolektor: `get_rates()` → `data: {eur_pln, usd_pln, date}`
+- W briefie: „Kurs euro dziś: 4.2335 złotego. Dolar: 3.6442 złotego."
+
+**Polskie newsy automatyzacja/robotyka — Google News RSS**
+- URL: `https://news.google.com/rss/search?q=automatyzacja+przemys%C5%82+Polska&hl=pl&gl=PL&ceid=PL:pl`
+- Działa bez klucza, 70+ artykułów, filtr blocklist
+- Kolektor: `get_pl_news(top_n=5)`
+- Inne polskie feedy (niedostępne z VM): automatykaonline.pl (redirect loop), kontroleng (DNS fail), inzynieria.com (za szerokie)
+
+**Długość briefu po wszystkich zmianach:** ~8400 znaków, ~9 minut audio NotebookLM
+
+**Bloki kalendarza — poprawki:**
+- `workday_end = 17 * 60` (było 18:00)
+- Filtr feedback loop: pomija bloki których tytuł zaczyna się od "przygotowanie do:", "zadania zaleg", "prep:", "overdue"
+
 #### Nierozwiązane
 
-- 📤 **Email z kaczmarekbrief@gmail.com** — Composio API zwraca 410 Gone (API v1/v2 wycofane, v3 404). Do rozwiązania osobno — opcje: Gmail OAuth2 one-time setup, lub inny relay.
+- 📤 **Email z kaczmarekbrief@gmail.com** — Composio API zwraca 410 Gone (API v1/v2 wycofane, v3 404). Opcje: drugie konto Gmail z App Password (SMTP), Gmail OAuth2 one-time setup. Odłożone.
 - ⏱ **arXiv** — timeout/429, graceful degradation, nie krytyczne.
+- 🔄 **NotebookLM rate-limit** — ~3 generacje/dzień. Przy wielu testach tego samego dnia odpada na edge-tts EN Ryan (fallback działa).
 
 ### Inne rutyny cloud (claude.ai) — działają osobno
 
